@@ -5,33 +5,41 @@
       src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png"
     />
   </div>
-  <button @click="">Charmander</button>
-  <button @click="">Charmeleon</button>
-  <button @click="">Charizard</button>
+  <button @click.prevent="fetchPokemon">{{ setPokeName('Charmander') }}</button>
+  <button @click.prevent="fetchPokemon">{{ setPokeName('Charmeleon') }}</button>
+  <button @click.prevent="fetchPokemon">{{ setPokeName('Charizard') }}</button>
   <br />
   <h2>Enter Pokemon name:</h2>
-  <input type="text" v-model="pokeName" @keydown.enter="setPokemonName" />
+  <input type="text" @keydown.enter.prevent="setPokeName" />
   <br />
-  <button @click="setPokemonName">Fetch Pokemon</button>
+  <button @click="fetchPokemon">Fetch Pokemon</button>
   <div>
-    <h3>Selected:</h3>
-    <img src="" alt="" />
+    <h3>Selected: {{ pokeName }}</h3>
+    <img :src="spriteSrc" :alt="pokeName" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { usePokeStore } from './store/pokemon'
+
+// const pokeStore = usePokeStore()
+// const currentPokemon = pokeStore.pokeName.value
 
 const pokeName = ref('ditto')
-const setSpriteSrc = ref('')
+const spriteSrc = ref(
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png'
+)
+const setPokeName = (payload) => (pokeName.value = payload)
 
-const setPokemonName = () => {
-  fetch(`https://pokeapi.co/api/v2/pokemon/${queryString.toLowerCase()}`)
+const fetchPokemon = () => {
+  fetch(`https://pokeapi.co/api/v2/pokemon/${pokeName.value.toLowerCase()}`)
     .then((response) => response.json())
-    .then((json) => {
-      setSpriteSrc(json.sprites.front_default)
-      return json
+    .then((data) => {
+      spriteSrc.value = data.sprites.front_default
     })
+  return { spriteSrc }
+
   // .then(({ name }) => setOutputName(name))
   // .catch(() => setError(true));
 }
